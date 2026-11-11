@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.png binary
+# Frozen evidence includes CRLF CSVs and generated SVG whitespace. Preserve bytes;
+# validate these artifacts with provenance/hash checks rather than formatting.
+examples/** -text -whitespace

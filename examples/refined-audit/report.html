@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BeaconLab · Detection research report</title>
+<style>
+:root{--ink:#172b39;--muted:#526673;--teal:#126d78;--line:#dbe4e8;--paper:#f3f6f7}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1160px;margin:auto;padding:46px 24px 70px}header{border-top:5px solid var(--teal);padding:26px 0 20px}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.16em;font-weight:750;color:var(--teal)}
+h1{font-size:clamp(30px,4vw,48px);line-height:1.12;margin:14px 0}h2{font-size:22px;margin:0 0 14px}h3{font-size:17px}
+p{margin:10px 0}.muted{color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
+.card,section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px}.card strong{display:block;font-size:30px;line-height:1.3}.card span{font-size:12px;color:var(--muted)}
+section{margin:18px 0}.notice{border-left:4px solid #b17925;background:#fff9ef;padding:16px 20px;border-radius:6px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th{text-align:left;color:var(--muted);font-weight:650;background:#f4f7f8}
+th,td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}td{white-space:nowrap}
+figure{margin:18px 0}img{display:block;max-width:100%;height:auto;border-radius:6px}
+pre{overflow:auto;font-size:12px;line-height:1.5;background:#f4f7f8;padding:18px;border-radius:6px}
+label{display:block;font-size:13px;margin:8px 0}select,input{font:inherit;padding:9px;border:1px solid #b9c8cf;border-radius:6px;max-width:100%}
+.calculator{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:20px;align-items:center}.result{background:#edf7f6;padding:18px;border-radius:8px}.result strong{font-size:27px;display:block}
+code{font-size:.92em}a{color:var(--teal)}ul{padding-left:22px}footer{font-size:12px;color:var(--muted)}
+@media(max-width:700px){main{padding:22px 14px}.cards{grid-template-columns:1fr 1fr}.calculator{grid-template-columns:1fr}section{padding:16px}}
+</style></head><body><main>
+<header><div class="eyebrow">BeaconLab / controlled experiment</div>
+<h1>What do simple network rules<br>actually distinguish?</h1>
+<p class="muted">A reproducible pilot comparing synthetic channel traffic with benign periodic HTTP/S clients.</p></header>
+<div class="notice"><strong>Interpretation boundary.</strong> All traffic is generated in a local lab. A positive label
+means a simulated channel profile, not malicious intent. Short pilot windows and shared client libraries limit generalization.</div>
+<div class="cards">
+<div class="card"><strong>60</strong><span>development runs</span></div>
+<div class="card"><strong>100</strong><span>held-out runs</span></div>
+<div class="card"><strong>4495</strong><span>stream-observer connections · all runs</span></div>
+<div class="card"><strong>6</strong><span>frozen detector policies</span></div>
+</div>
+<section><h2>What this experiment establishes</h2><p>The pooled timing-plus-size baseline detected 40/40 scored positive runs and alerted on 30/60 scored benign runs (FPR 50.0%). Its label is a synthetic workload, not an attack verdict.</p><p>Transport calibration alone detected 40/40 scored positives and produced 20/60 false alerts on the same held-out set, with 100.0% scoring coverage.</p><p>On the same held-out runs, the persistent, transport-calibrated rule detected 39/40 scored positives and alerted on 20/60 scored benign runs. Positive coverage was 100.0%; benign coverage was 100.0%.</p><p>The later-gate/persistence variant removed no additional false alerts versus calibration alone. It detected 39 versus 40 positives; median detection delay was 1.10 versus 0.50 seconds.</p><p>Remaining false alerts include health_check. Periodicity and size variation alone still overlap with benign behavior.</p><p>The 10.0% development-FPR budget produced held-out recall 0.0% and FPR 0.0%. It emitted no alerts: precision is undefined, and zero alerts do not demonstrate useful detection.</p><p>Fresh seeds test new draws from the same generator. These findings support investigation of periodic traffic, not operational malware-detection claims.</p></section>
+<section><h2>Evidence and provenance</h2><p>Actual loopback HTTP/S traffic was observed by an active transparent TCP forwarder. These are socket-level stream observations, not passive packet captures. Byte counts include TCP payload and TLS records, not TCP/IP headers. No PCAP was captured for this experiment.</p>
+<p class="muted">Rules were selected on development runs and frozen before held-out traffic collection.
+Each completed run is one fixed-duration client–destination window. The first qualifying prefix creates at most one alert.</p>
+<p class="muted">Configured minimum for timing-rule prefixes: <strong>6 completed connections</strong>.
+Refinement policies, when present, carry their own gates and persistence settings in the frozen model.
+These can affect TPR, FPR, coverage, and delay. Client novelty does not use this gate.</p>
+<p><strong>Observation backend:</strong> <code>tcp_stream_proxy</code> ·
+<strong>Failed runs excluded:</strong> 0</p></section>
+<section><h2>Held-out results</h2><div class="scroll"><table><thead><tr>
+<th>Detector</th><th>Transport</th><th>Scored / total</th><th>TP / FN</th><th>FP / TN</th>
+<th>TPR</th><th>FPR</th><th>Precision</th><th>Median detection (s)</th>
+</tr></thead><tbody><tr><td>Timing</td><td>HTTP</td><td>50/50</td><td>20 / 0</td><td>20 / 10</td><td>100.0%</td><td>66.7%</td><td>50.0%</td><td>0.50</td></tr><tr><td>Timing</td><td>HTTPS</td><td>50/50</td><td>20 / 0</td><td>20 / 10</td><td>100.0%</td><td>66.7%</td><td>50.0%</td><td>0.50</td></tr><tr><td>Timing + size</td><td>HTTP</td><td>50/50</td><td>20 / 0</td><td>10 / 20</td><td>100.0%</td><td>33.3%</td><td>66.7%</td><td>0.50</td></tr><tr><td>Timing + size</td><td>HTTPS</td><td>50/50</td><td>20 / 0</td><td>20 / 10</td><td>100.0%</td><td>66.7%</td><td>50.0%</td><td>0.50</td></tr><tr><td>Client novelty</td><td>HTTP</td><td>50/50</td><td>0 / 20</td><td>0 / 30</td><td>0.0%</td><td>0.0%</td><td>N/A</td><td>N/A</td></tr><tr><td>Client novelty</td><td>HTTPS</td><td>50/50</td><td>0 / 20</td><td>0 / 30</td><td>0.0%</td><td>0.0%</td><td>N/A</td><td>N/A</td></tr><tr><td>Transport calibrated</td><td>HTTP</td><td>50/50</td><td>20 / 0</td><td>10 / 20</td><td>100.0%</td><td>33.3%</td><td>66.7%</td><td>0.50</td></tr><tr><td>Transport calibrated</td><td>HTTPS</td><td>50/50</td><td>20 / 0</td><td>10 / 20</td><td>100.0%</td><td>33.3%</td><td>66.7%</td><td>0.50</td></tr><tr><td>Persistent + calibrated</td><td>HTTP</td><td>50/50</td><td>20 / 0</td><td>10 / 20</td><td>100.0%</td><td>33.3%</td><td>66.7%</td><td>1.10</td></tr><tr><td>Persistent + calibrated</td><td>HTTPS</td><td>50/50</td><td>19 / 1</td><td>10 / 20</td><td>95.0%</td><td>33.3%</td><td>65.5%</td><td>1.10</td></tr><tr><td>Budgeted + persistent</td><td>HTTP</td><td>50/50</td><td>0 / 20</td><td>0 / 30</td><td>0.0%</td><td>0.0%</td><td>N/A</td><td>N/A</td></tr><tr><td>Budgeted + persistent</td><td>HTTPS</td><td>50/50</td><td>0 / 20</td><td>0 / 30</td><td>0.0%</td><td>0.0%</td><td>N/A</td><td>N/A</td></tr></tbody></table></div>
+<p class="muted">N/A means the feature or denominator is unavailable—not zero. Coverage must be considered alongside detection rates.</p>
+<figure><img alt="Research evaluation chart" src="figures/detection_rates.png"></figure><figure><img alt="Research evaluation chart" src="figures/base_rate.png"></figure></section>
+<section><h2>Paired changes versus pooled timing + size</h2><div class='scroll'><table><thead><tr><th>Candidate</th><th>Jointly scored</th><th>Benign alerts removed</th><th>Benign alerts added</th><th>Positive detections lost</th><th>Positive detections gained</th></tr></thead><tbody><tr><td>Transport calibrated</td><td>100</td><td>10</td><td>0</td><td>0</td><td>0</td></tr><tr><td>Persistent + calibrated</td><td>100</td><td>10</td><td>0</td><td>1</td><td>0</td></tr><tr><td>Budgeted + persistent</td><td>100</td><td>30</td><td>0</td><td>40</td><td>0</td></tr></tbody></table></div><p class='muted'>All differences use the same held-out runs. Unavailable pairs are excluded; review coverage.</p></section>
+<section><h2>Uncertainty and alert burden</h2><div class="scroll"><table><thead><tr>
+<th>Detector · both transports</th><th>TPR · 95% interval</th><th>FPR · 95% interval</th>
+<th>False alerts / benign client-hour</th><th>Precision at assumed 1:50</th>
+</tr></thead><tbody><tr><td>Timing</td><td>91.2–100.0%</td><td>54.1–77.3%</td><td>800.00</td><td>2.9%</td></tr><tr><td>Timing + size</td><td>91.2–100.0%</td><td>37.7–62.3%</td><td>600.00</td><td>3.8%</td></tr><tr><td>Client novelty</td><td>0.0–8.8%</td><td>0.0–6.0%</td><td>0.00</td><td>N/A</td></tr><tr><td>Transport calibrated</td><td>91.2–100.0%</td><td>22.7–45.9%</td><td>400.00</td><td>5.7%</td></tr><tr><td>Persistent + calibrated</td><td>87.1–99.6%</td><td>22.7–45.9%</td><td>400.00</td><td>5.5%</td></tr><tr><td>Budgeted + persistent</td><td>0.0–8.8%</td><td>0.0–6.0%</td><td>0.00</td><td>N/A</td></tr></tbody></table></div>
+<p class="muted">Intervals are approximate Wilson intervals at the run level; shared generator and environment limit independence. The accelerated pilot's client-hour
+rates are normalized measurements, not forecasts of production alert volume. A zero observed FPR can still have a wide interval.</p></section>
+<section><h2>Base-rate sensitivity</h2><p>Change the assumed ratio below. This calculation holds the measured TPR/FPR
+constant and is a hypothetical scenario, not a claim about a real network.</p>
+<div class="calculator"><div><label for="detector">Detector</label><select id="detector"><option value="0">Timing</option><option value="1">Timing + size</option><option value="2">Client novelty</option><option value="3">Transport calibrated</option><option value="4">Persistent + calibrated</option><option value="5">Budgeted + persistent</option></select></div>
+<div><label for="ratio">Benign windows per simulated-channel window</label><input id="ratio" type="number" min="1" max="1000000" value="50"></div>
+<div class="result" aria-live="polite"><span>Prevalence-adjusted precision</span><strong id="precision"></strong><span id="counts"></span></div></div>
+<p class="muted">Precision = TPR × prevalence / [TPR × prevalence + FPR × (1 − prevalence)].</p></section>
+<section><h2>Where the combined rule succeeds or fails</h2><div class="scroll"><table><thead><tr>
+<th>Detector</th><th>Workload</th><th>Transport</th><th>Ground-truth class</th><th>Scored / total</th><th>Flagged fraction</th>
+</tr></thead><tbody><tr><td>Timing + size</td><td>channel_regular</td><td>HTTP</td><td>simulated channel</td><td>10/10</td><td>100.0%</td></tr><tr><td>Timing + size</td><td>channel_variable</td><td>HTTP</td><td>simulated channel</td><td>10/10</td><td>100.0%</td></tr><tr><td>Timing + size</td><td>health_check</td><td>HTTP</td><td>benign</td><td>10/10</td><td>100.0%</td></tr><tr><td>Timing + size</td><td>monitor_heartbeat</td><td>HTTP</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Timing + size</td><td>update_check</td><td>HTTP</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Timing + size</td><td>channel_regular</td><td>HTTPS</td><td>simulated channel</td><td>10/10</td><td>100.0%</td></tr><tr><td>Timing + size</td><td>channel_variable</td><td>HTTPS</td><td>simulated channel</td><td>10/10</td><td>100.0%</td></tr><tr><td>Timing + size</td><td>health_check</td><td>HTTPS</td><td>benign</td><td>10/10</td><td>100.0%</td></tr><tr><td>Timing + size</td><td>monitor_heartbeat</td><td>HTTPS</td><td>benign</td><td>10/10</td><td>100.0%</td></tr><tr><td>Timing + size</td><td>update_check</td><td>HTTPS</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Persistent + calibrated</td><td>channel_regular</td><td>HTTP</td><td>simulated channel</td><td>10/10</td><td>100.0%</td></tr><tr><td>Persistent + calibrated</td><td>channel_variable</td><td>HTTP</td><td>simulated channel</td><td>10/10</td><td>100.0%</td></tr><tr><td>Persistent + calibrated</td><td>health_check</td><td>HTTP</td><td>benign</td><td>10/10</td><td>100.0%</td></tr><tr><td>Persistent + calibrated</td><td>monitor_heartbeat</td><td>HTTP</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Persistent + calibrated</td><td>update_check</td><td>HTTP</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Persistent + calibrated</td><td>channel_regular</td><td>HTTPS</td><td>simulated channel</td><td>10/10</td><td>100.0%</td></tr><tr><td>Persistent + calibrated</td><td>channel_variable</td><td>HTTPS</td><td>simulated channel</td><td>10/10</td><td>90.0%</td></tr><tr><td>Persistent + calibrated</td><td>health_check</td><td>HTTPS</td><td>benign</td><td>10/10</td><td>100.0%</td></tr><tr><td>Persistent + calibrated</td><td>monitor_heartbeat</td><td>HTTPS</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Persistent + calibrated</td><td>update_check</td><td>HTTPS</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Budgeted + persistent</td><td>channel_regular</td><td>HTTP</td><td>simulated channel</td><td>10/10</td><td>0.0%</td></tr><tr><td>Budgeted + persistent</td><td>channel_variable</td><td>HTTP</td><td>simulated channel</td><td>10/10</td><td>0.0%</td></tr><tr><td>Budgeted + persistent</td><td>health_check</td><td>HTTP</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Budgeted + persistent</td><td>monitor_heartbeat</td><td>HTTP</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Budgeted + persistent</td><td>update_check</td><td>HTTP</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Budgeted + persistent</td><td>channel_regular</td><td>HTTPS</td><td>simulated channel</td><td>10/10</td><td>0.0%</td></tr><tr><td>Budgeted + persistent</td><td>channel_variable</td><td>HTTPS</td><td>simulated channel</td><td>10/10</td><td>0.0%</td></tr><tr><td>Budgeted + persistent</td><td>health_check</td><td>HTTPS</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Budgeted + persistent</td><td>monitor_heartbeat</td><td>HTTPS</td><td>benign</td><td>10/10</td><td>0.0%</td></tr><tr><td>Budgeted + persistent</td><td>update_check</td><td>HTTPS</td><td>benign</td><td>10/10</td><td>0.0%</td></tr></tbody></table></div>
+<p class="muted">For simulated channels, flagged fraction is recall. For benign workloads, it is a false-positive rate.
+The same held-out benign set supports comparison of the two simulated timing conditions.</p></section>
+<section><h2>Frozen model</h2><p>Timing and request-size variation are the only numeric predictors.
+IP addresses, ports, payload markers, profile names, and absolute timestamps are excluded from the prediction rules.</p>
+<details><summary>Show exact model and development run IDs</summary><pre>{
+  &quot;schema_version&quot;: 1,
+  &quot;training_run_ids&quot;: [
+    &quot;rac9f9e8e8f1c6900&quot;,
+    &quot;r4fe916111e9e0751&quot;,
+    &quot;r515c228ecf2cc361&quot;,
+    &quot;r33c2410594dffe53&quot;,
+    &quot;rcf53ca1d2b87c4fe&quot;,
+    &quot;r8512fa15799f3c2f&quot;,
+    &quot;r8c8df0f750e1a223&quot;,
+    &quot;r40bbc3b0ce2105de&quot;,
+    &quot;rf51543a9ca083514&quot;,
+    &quot;re4a054328a95628b&quot;,
+    &quot;r195f7e05371725eb&quot;,
+    &quot;r6a2e06a7c9eaa59e&quot;,
+    &quot;rcc0ce30f675dcf27&quot;,
+    &quot;r4d5d029494d6451f&quot;,
+    &quot;r591dcd8d948b604f&quot;,
+    &quot;reaa9fdffc62b2f76&quot;,
+    &quot;rb393a5055e84bf7d&quot;,
+    &quot;r0c2da2cf04ad8d83&quot;,
+    &quot;r780f13d495eecc92&quot;,
+    &quot;rab1ef79f6794bb2b&quot;,
+    &quot;r428aa1e6b3a7bb8a&quot;,
+    &quot;rcb17221dbf537ca6&quot;,
+    &quot;rc64ec79c88377220&quot;,
+    &quot;rb49483702904a128&quot;,
+    &quot;r6b89d45cc3f54aa5&quot;,
+    &quot;r20b3f291c68ea85c&quot;,
+    &quot;r3aeddceeaa419dc8&quot;,
+    &quot;r0251e6aa5b291d35&quot;,
+    &quot;r10a66f5451f4106b&quot;,
+    &quot;r4225ce44ff999684&quot;,
+    &quot;rff8bf03349597b07&quot;,
+    &quot;r1258ee0f71785a3b&quot;,
+    &quot;r512403a74a72d992&quot;,
+    &quot;r72583bbd8b5eadfe&quot;,
+    &quot;r4b87473230329f53&quot;,
+    &quot;r24148829724f8612&quot;,
+    &quot;re8ee7b2775de5fce&quot;,
+    &quot;r9d840786f5b5a13c&quot;,
+    &quot;r8c65077fc36d91b0&quot;,
+    &quot;r2e8370c714fbf2df&quot;,
+    &quot;r183ead0f304d80e8&quot;,
+    &quot;r8432b4b49dd9a011&quot;,
+    &quot;ra5840a2e89dc9192&quot;,
+    &quot;ref045225a3789cb1&quot;,
+    &quot;r971b1d31d538a07f&quot;,
+    &quot;r44367bc6ac9ed1b4&quot;,
+    &quot;r78a162e9a2d7a87d&quot;,
+    &quot;rf46ecc765465f451&quot;,
+    &quot;rf14eb204b78066b9&quot;,
+    &quot;r5b822ddf182391e3&quot;,
+    &quot;r87d285d333dc3a91&quot;,
+    &quot;r81b8aca7fbf4e84b&quot;,
+    &quot;r26b505ad451f733b&quot;,
+    &quot;rbc5e10b8c27c6453&quot;,
+    &quot;r63a1a14e71f83d33&quot;,
+    &quot;r40b87a38e70ffb99&quot;,
+    &quot;r268367a6ba7cb73b&quot;,
+    &quot;reb46d337760ddbce&quot;,
+    &quot;r0d48cdf45572149c&quot;,
+    &quot;rafaf29f3a07527a9&quot;
+  ],
+  &quot;training_split&quot;: &quot;development&quot;,
+  &quot;selection&quot;: &quot;maximize development balanced accuracy; ties prefer lower FPR; never-alert fallback&quot;,
+  &quot;evaluation_policy&quot;: &quot;first qualifying causal prefix; at most one alert per run&quot;,
+  &quot;numeric_feature_allowlist&quot;: [
+    &quot;interval_cv&quot;,
+    &quot;request_size_cv&quot;
+  ],
+  &quot;grid&quot;: {
+    &quot;interval_cv_max&quot;: [
+      0.0,
+      0.03,
+      0.06,
+      0.1,
+      0.2,
+      0.35,
+      0.5,
+      0.8,
+      1.2
+    ],
+    &quot;request_size_cv_max&quot;: [
+      0.0,
+      0.01,
+      0.03,
+      0.06,
+      0.1,
+      0.2,
+      0.4,
+      0.8
+    ]
+  },
+  &quot;rules&quot;: {
+    &quot;timing&quot;: {
+      &quot;kind&quot;: &quot;timing&quot;,
+      &quot;interval_cv_max&quot;: 0.35,
+      &quot;development_balanced_accuracy&quot;: 0.6666666666666667,
+      &quot;development_fpr&quot;: 0.6666666666666666
+    },
+    &quot;timing_and_size&quot;: {
+      &quot;kind&quot;: &quot;timing_and_size&quot;,
+      &quot;interval_cv_max&quot;: 0.35,
+      &quot;request_size_cv_max&quot;: 0.06,
+      &quot;development_balanced_accuracy&quot;: 0.75,
+      &quot;development_fpr&quot;: 0.5
+    },
+    &quot;client_novelty&quot;: {
+      &quot;kind&quot;: &quot;client_novelty&quot;,
+      &quot;known_benign&quot;: {
+        &quot;ja3&quot;: [
+          &quot;dbb158bbf02cb040164d288c9b1d8492&quot;
+        ],
+        &quot;user_agent&quot;: [
+          &quot;BeaconLab-ResearchClient/1.0&quot;
+        ]
+      }
+    },
+    &quot;transport_calibrated&quot;: {
+      &quot;kind&quot;: &quot;by_transport&quot;,
+      &quot;transport_rules&quot;: {
+        &quot;http&quot;: {
+          &quot;kind&quot;: &quot;timing_and_size&quot;,
+          &quot;interval_cv_max&quot;: 0.35,
+          &quot;request_size_cv_max&quot;: 0.06,
+          &quot;min_events&quot;: 6,
+          &quot;consecutive_prefixes&quot;: 1,
+          &quot;selection_status&quot;: &quot;selected&quot;,
+          &quot;development&quot;: {
+            &quot;tp&quot;: 12,
+            &quot;fn&quot;: 0,
+            &quot;fp&quot;: 6,
+            &quot;tn&quot;: 12,
+            &quot;tpr&quot;: 1.0,
+            &quot;fpr&quot;: 0.3333333333333333,
+            &quot;coverage&quot;: 1.0,
+            &quot;fpr_ci95&quot;: [
+              0.1627877475083369,
+              0.5625053270405489
+            ]
+          },
+          &quot;max_development_fpr&quot;: null
+        },
+        &quot;https&quot;: {
+          &quot;kind&quot;: &quot;timing_and_size&quot;,
+          &quot;interval_cv_max&quot;: 0.35,
+          &quot;request_size_cv_max&quot;: 0.01,
+          &quot;min_events&quot;: 6,
+          &quot;consecutive_prefixes&quot;: 1,
+          &quot;selection_status&quot;: &quot;selected&quot;,
+          &quot;development&quot;: {
+            &quot;tp&quot;: 12,
+            &quot;fn&quot;: 0,
+            &quot;fp&quot;: 6,
+            &quot;tn&quot;: 12,
+            &quot;tpr&quot;: 1.0,
+            &quot;fpr&quot;: 0.3333333333333333,
+            &quot;coverage&quot;: 1.0,
+            &quot;fpr_ci95&quot;: [
+              0.1627877475083369,
+              0.5625053270405489
+            ]
+          },
+          &quot;max_development_fpr&quot;: null
+        }
+      }
+    },
+    &quot;persistent_calibrated&quot;: {
+      &quot;kind&quot;: &quot;by_transport&quot;,
+      &quot;transport_rules&quot;: {
+        &quot;http&quot;: {
+          &quot;kind&quot;: &quot;timing_and_size&quot;,
+          &quot;interval_cv_max&quot;: 0.35,
+          &quot;request_size_cv_max&quot;: 0.06,
+          &quot;min_events&quot;: 10,
+          &quot;consecutive_prefixes&quot;: 3,
+          &quot;selection_status&quot;: &quot;selected&quot;,
+          &quot;development&quot;: {
+            &quot;tp&quot;: 12,
+            &quot;fn&quot;: 0,
+            &quot;fp&quot;: 6,
+            &quot;tn&quot;: 12,
+            &quot;tpr&quot;: 1.0,
+            &quot;fpr&quot;: 0.3333333333333333,
+            &quot;coverage&quot;: 1.0,
+            &quot;fpr_ci95&quot;: [
+              0.1627877475083369,
+              0.5625053270405489
+            ]
+          },
+          &quot;max_development_fpr&quot;: null
+        },
+        &quot;https&quot;: {
+          &quot;kind&quot;: &quot;timing_and_size&quot;,
+          &quot;interval_cv_max&quot;: 0.35,
+          &quot;request_size_cv_max&quot;: 0.01,
+          &quot;min_events&quot;: 10,
+          &quot;consecutive_prefixes&quot;: 3,
+          &quot;selection_status&quot;: &quot;selected&quot;,
+          &quot;development&quot;: {
+            &quot;tp&quot;: 12,
+            &quot;fn&quot;: 0,
+            &quot;fp&quot;: 6,
+            &quot;tn&quot;: 12,
+            &quot;tpr&quot;: 1.0,
+            &quot;fpr&quot;: 0.3333333333333333,
+            &quot;coverage&quot;: 1.0,
+            &quot;fpr_ci95&quot;: [
+              0.1627877475083369,
+              0.5625053270405489
+            ]
+          },
+          &quot;max_development_fpr&quot;: null
+        }
+      }
+    },
+    &quot;budgeted_persistent&quot;: {
+      &quot;kind&quot;: &quot;by_transport&quot;,
+      &quot;transport_rules&quot;: {
+        &quot;http&quot;: {
+          &quot;kind&quot;: &quot;timing_and_size&quot;,
+          &quot;interval_cv_max&quot;: -1.0,
+          &quot;request_size_cv_max&quot;: -1.0,
+          &quot;min_events&quot;: 10,
+          &quot;consecutive_prefixes&quot;: 3,
+          &quot;selection_status&quot;: &quot;no_useful_development_rule&quot;,
+          &quot;development&quot;: {
+            &quot;tp&quot;: 0,
+            &quot;fn&quot;: 12,
+            &quot;fp&quot;: 0,
+            &quot;tn&quot;: 18,
+            &quot;tpr&quot;: 0.0,
+            &quot;fpr&quot;: 0.0,
+            &quot;coverage&quot;: 1.0,
+            &quot;fpr_ci95&quot;: [
+              0.0,
+              0.17587922364665765
+            ]
+          },
+          &quot;max_development_fpr&quot;: 0.1
+        },
+        &quot;https&quot;: {
+          &quot;kind&quot;: &quot;timing_and_size&quot;,
+          &quot;interval_cv_max&quot;: -1.0,
+          &quot;request_size_cv_max&quot;: -1.0,
+          &quot;min_events&quot;: 10,
+          &quot;consecutive_prefixes&quot;: 3,
+          &quot;selection_status&quot;: &quot;no_useful_development_rule&quot;,
+          &quot;development&quot;: {
+            &quot;tp&quot;: 0,
+            &quot;fn&quot;: 12,
+            &quot;fp&quot;: 0,
+            &quot;tn&quot;: 18,
+            &quot;tpr&quot;: 0.0,
+            &quot;fpr&quot;: 0.0,
+            &quot;coverage&quot;: 1.0,
+            &quot;fpr_ci95&quot;: [
+              0.0,
+              0.17587922364665765
+            ]
+          },
+          &quot;max_development_fpr&quot;: 0.1
+        }
+      }
+    }
+  },
+  &quot;refinement&quot;: {
+    &quot;min_events&quot;: 10,
+    &quot;consecutive_prefixes&quot;: 3,
+    &quot;max_development_fpr&quot;: 0.1,
+    &quot;primary_comparison&quot;: &quot;timing_and_size versus persistent_calibrated on the same held-out runs&quot;,
+    &quot;budget_interpretation&quot;: &quot;Empirical development cap, not a guaranteed held-out or operational FPR&quot;,
+    &quot;feature_scope&quot;: &quot;Same two CV features; transport selects thresholds; no profile/label/seed at prediction&quot;,
+    &quot;ablation&quot;: &quot;transport_calibrated isolates transport-specific fitting; persistent_calibrated also changes the event gate&quot;
+  },
+  &quot;frozen_utc&quot;: &quot;2026-11-10T05:45:13.962517+00:00&quot;
+}</pre></details>
+<p>The client-novelty baseline compares HTTP User-Agent or HTTPS JA3 against values seen in benign development traffic.
+An alert means an unseen observable signal relative to that reference population, not an attacker.
+Legitimate client-stack changes or incomplete benign training coverage can produce alerts.
+All generated clients deliberately use the same library and User-Agent. A shared fingerprint is not evidence of maliciousness.</p></section>
+<section><h2>Limits and next checks</h2><ul><li>Labels describe synthetic workload purpose, not observed malicious intent.</li><li>Reported rates are conditional on detector availability; coverage is reported separately.</li><li>Wilson intervals are approximate per-run binomial intervals, not guarantees of real-network generalization.</li><li>Prevalence-adjusted precision is hypothetical and assumes measured TPR/FPR transfer unchanged.</li><li>Benign-hour alert rates from accelerated pilot traffic are not production alert-volume forecasts.</li><li>The first qualifying prefix emits at most one alert per run; thresholds remain frozen.</li><li>Original baselines use the configured minimum-event gate. Refinement policies, when present, carry explicit gates and persistence; client novelty does not use them.</li><li>Client novelty means an observed UA/JA3 was absent from benign development signals; it can flag legitimate population changes and does not establish maliciousness.</li><li>Repeated config/seed inputs are deterministic only with fixed generator code/runtime; measured traffic, fitted rules, and results may vary between live executions.</li><li>Transport calibration and persistence were chosen after reviewing the earlier pilot, then evaluated on fresh runs. This remains the same synthetic generator family.</li><li>The false-positive budget constrains development observations only. Report held-out misses and uncertainty even when no alerts occur.</li><li>Consecutive cumulative prefixes overlap; persistence is a debounce policy, not independent statistical confirmation.</li></ul>
+<p>Collect longer runs, include independently sourced benign traffic, and validate the packet-capture/Zeek path before making operational claims.
+TLS changes the available evidence; a performance drop is not a predetermined outcome.</p></section>
+<footer>Experiment: BeaconLab 0.2.0 · report generator: 0.2.0 · generated from recorded experiments, not invented metric values.
+Data files: <a href="metrics.json">metrics.json</a> · <a href="metrics.csv">metrics.csv</a> · <a href="predictions.csv">predictions.csv</a>.
+Sources and method are documented in the project README and research protocol.</footer>
+</main><script>
+const rows=[{"name": "Timing", "tpr": 1.0, "fpr": 0.6666666666666666}, {"name": "Timing + size", "tpr": 1.0, "fpr": 0.5}, {"name": "Client novelty", "tpr": 0.0, "fpr": 0.0}, {"name": "Transport calibrated", "tpr": 1.0, "fpr": 0.3333333333333333}, {"name": "Persistent + calibrated", "tpr": 0.975, "fpr": 0.3333333333333333}, {"name": "Budgeted + persistent", "tpr": 0.0, "fpr": 0.0}];
+function update(){
+ const row=rows[Number(document.getElementById("detector").value)];
+ const ratio=Number(document.getElementById("ratio").value);
+ const out=document.getElementById("precision"), counts=document.getElementById("counts");
+ if(!row || !Number.isFinite(ratio) || ratio<1 || row.tpr===null || row.fpr===null){
+  out.textContent="N/A";counts.textContent="Insufficient measurements or invalid ratio.";return;
+ }
+ const p=1/(1+ratio), tp=10000*p*row.tpr, fp=10000*(1-p)*row.fpr;
+ out.textContent=(tp+fp)>0?(100*tp/(tp+fp)).toFixed(1)+"%":"N/A";
+ counts.textContent=(tp+fp)>0?tp.toFixed(1)+" true and "+fp.toFixed(1)+" false alerts per 10,000 windows (expected).":"The measured rule produced no alerts; precision is undefined.";
+}
+document.getElementById("detector").addEventListener("change",update);
+document.getElementById("ratio").addEventListener("input",update);update();
+</script></body></html>

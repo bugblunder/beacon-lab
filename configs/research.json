@@ -1,0 +1,11 @@
+{
+  "description": "Longer controlled study: about 60 minutes plus processing; still synthetic traffic, not production validation.",
+  "seed": 114729,
+  "window_seconds": 30.0,
+  "base_interval_seconds": 1.0,
+  "development_repetitions": 4,
+  "test_repetitions": 8,
+  "profiles": ["channel_regular", "channel_variable", "health_check", "monitor_heartbeat", "update_check"],
+  "transports": ["http", "https"],
+  "min_events": 6
+}

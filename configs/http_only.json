@@ -1,0 +1,11 @@
+{
+  "description": "Small HTTP-only experiment for machines without OpenSSL.",
+  "seed": 8314,
+  "window_seconds": 2.0,
+  "base_interval_seconds": 0.12,
+  "development_repetitions": 2,
+  "test_repetitions": 3,
+  "profiles": ["channel_regular", "channel_variable", "health_check", "monitor_heartbeat", "update_check"],
+  "transports": ["http"],
+  "min_events": 6
+}

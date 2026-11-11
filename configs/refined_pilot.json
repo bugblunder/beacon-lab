@@ -1,0 +1,16 @@
+{
+  "description": "Fresh v0.2 controlled study: 60 development and 100 test runs, approximately 8 minutes. Accelerated synthetic traffic, not production validation.",
+  "seed": 9384721,
+  "window_seconds": 3.0,
+  "base_interval_seconds": 0.10,
+  "development_repetitions": 6,
+  "test_repetitions": 10,
+  "profiles": ["channel_regular", "channel_variable", "health_check", "monitor_heartbeat", "update_check"],
+  "transports": ["http", "https"],
+  "min_events": 6,
+  "refinement": {
+    "min_events": 10,
+    "consecutive_prefixes": 3,
+    "max_development_fpr": 0.10
+  }
+}

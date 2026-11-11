@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "training_run_ids": [
+    "r51877e4a294d2956",
+    "r37b0bf026665a016",
+    "rf123b3b9fe66f172",
+    "r3cf5a743afd06a2f",
+    "r5b4a77005104214f",
+    "r5f114d466c957441",
+    "r3ebead9541f0abdd",
+    "r773b202edecf6301",
+    "rdd74b8308d633277",
+    "r4a4724bf7d64313d",
+    "r29546a95eb6099c5",
+    "r1639dffff89fa6f2",
+    "r744313d2d875c424",
+    "ree39ee03d78a925f",
+    "r40d5843cb27fc656",
+    "r2da472d6c42aa793",
+    "rb21ee1acf4dfe8bc",
+    "r5f6d31d436bc30c1",
+    "rfe4ce6d425104026",
+    "rdc538e036b509570"
+  ],
+  "training_split": "development",
+  "selection": "maximize development balanced accuracy; ties prefer lower FPR; never-alert fallback",
+  "evaluation_policy": "first qualifying causal prefix; at most one alert per run",
+  "numeric_feature_allowlist": [
+    "interval_cv",
+    "request_size_cv"
+  ],
+  "grid": {
+    "interval_cv_max": [
+      0.0,
+      0.03,
+      0.06,
+      0.1,
+      0.2,
+      0.35,
+      0.5,
+      0.8,
+      1.2
+    ],
+    "request_size_cv_max": [
+      0.0,
+      0.01,
+      0.03,
+      0.06,
+      0.1,
+      0.2,
+      0.4,
+      0.8
+    ]
+  },
+  "rules": {
+    "timing": {
+      "kind": "timing",
+      "interval_cv_max": 0.35,
+      "development_balanced_accuracy": 0.6666666666666667,
+      "development_fpr": 0.6666666666666666
+    },
+    "timing_and_size": {
+      "kind": "timing_and_size",
+      "interval_cv_max": 0.35,
+      "request_size_cv_max": 0.06,
+      "development_balanced_accuracy": 0.75,
+      "development_fpr": 0.5
+    },
+    "client_novelty": {
+      "kind": "client_novelty",
+      "known_benign": {
+        "ja3": [
+          "dbb158bbf02cb040164d288c9b1d8492"
+        ],
+        "user_agent": [
+          "BeaconLab-ResearchClient/1.0"
+        ]
+      }
+    }
+  },
+  "frozen_utc": "2026-11-09T14:03:59.635387+00:00"
+}

@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "training_run_ids": [
+    "rac9f9e8e8f1c6900",
+    "r4fe916111e9e0751",
+    "r515c228ecf2cc361",
+    "r33c2410594dffe53",
+    "rcf53ca1d2b87c4fe",
+    "r8512fa15799f3c2f",
+    "r8c8df0f750e1a223",
+    "r40bbc3b0ce2105de",
+    "rf51543a9ca083514",
+    "re4a054328a95628b",
+    "r195f7e05371725eb",
+    "r6a2e06a7c9eaa59e",
+    "rcc0ce30f675dcf27",
+    "r4d5d029494d6451f",
+    "r591dcd8d948b604f",
+    "reaa9fdffc62b2f76",
+    "rb393a5055e84bf7d",
+    "r0c2da2cf04ad8d83",
+    "r780f13d495eecc92",
+    "rab1ef79f6794bb2b",
+    "r428aa1e6b3a7bb8a",
+    "rcb17221dbf537ca6",
+    "rc64ec79c88377220",
+    "rb49483702904a128",
+    "r6b89d45cc3f54aa5",
+    "r20b3f291c68ea85c",
+    "r3aeddceeaa419dc8",
+    "r0251e6aa5b291d35",
+    "r10a66f5451f4106b",
+    "r4225ce44ff999684",
+    "rff8bf03349597b07",
+    "r1258ee0f71785a3b",
+    "r512403a74a72d992",
+    "r72583bbd8b5eadfe",
+    "r4b87473230329f53",
+    "r24148829724f8612",
+    "re8ee7b2775de5fce",
+    "r9d840786f5b5a13c",
+    "r8c65077fc36d91b0",
+    "r2e8370c714fbf2df",
+    "r183ead0f304d80e8",
+    "r8432b4b49dd9a011",
+    "ra5840a2e89dc9192",
+    "ref045225a3789cb1",
+    "r971b1d31d538a07f",
+    "r44367bc6ac9ed1b4",
+    "r78a162e9a2d7a87d",
+    "rf46ecc765465f451",
+    "rf14eb204b78066b9",
+    "r5b822ddf182391e3",
+    "r87d285d333dc3a91",
+    "r81b8aca7fbf4e84b",
+    "r26b505ad451f733b",
+    "rbc5e10b8c27c6453",
+    "r63a1a14e71f83d33",
+    "r40b87a38e70ffb99",
+    "r268367a6ba7cb73b",
+    "reb46d337760ddbce",
+    "r0d48cdf45572149c",
+    "rafaf29f3a07527a9"
+  ],
+  "training_split": "development",
+  "selection": "maximize development balanced accuracy; ties prefer lower FPR; never-alert fallback",
+  "evaluation_policy": "first qualifying causal prefix; at most one alert per run",
+  "numeric_feature_allowlist": [
+    "interval_cv",
+    "request_size_cv"
+  ],
+  "grid": {
+    "interval_cv_max": [
+      0.0,
+      0.03,
+      0.06,
+      0.1,
+      0.2,
+      0.35,
+      0.5,
+      0.8,
+      1.2
+    ],
+    "request_size_cv_max": [
+      0.0,
+      0.01,
+      0.03,
+      0.06,
+      0.1,
+      0.2,
+      0.4,
+      0.8
+    ]
+  },
+  "rules": {
+    "timing": {
+      "kind": "timing",
+      "interval_cv_max": 0.35,
+      "development_balanced_accuracy": 0.6666666666666667,
+      "development_fpr": 0.6666666666666666
+    },
+    "timing_and_size": {
+      "kind": "timing_and_size",
+      "interval_cv_max": 0.35,
+      "request_size_cv_max": 0.06,
+      "development_balanced_accuracy": 0.75,
+      "development_fpr": 0.5
+    },
+    "client_novelty": {
+      "kind": "client_novelty",
+      "known_benign": {
+        "ja3": [
+          "dbb158bbf02cb040164d288c9b1d8492"
+        ],
+        "user_agent": [
+          "BeaconLab-ResearchClient/1.0"
+        ]
+      }
+    },
+    "transport_calibrated": {
+      "kind": "by_transport",
+      "transport_rules": {
+        "http": {
+          "kind": "timing_and_size",
+          "interval_cv_max": 0.35,
+          "request_size_cv_max": 0.06,
+          "min_events": 6,
+          "consecutive_prefixes": 1,
+          "selection_status": "selected",
+          "development": {
+            "tp": 12,
+            "fn": 0,
+            "fp": 6,
+            "tn": 12,
+            "tpr": 1.0,
+            "fpr": 0.3333333333333333,
+            "coverage": 1.0,
+            "fpr_ci95": [
+              0.1627877475083369,
+              0.5625053270405489
+            ]
+          },
+          "max_development_fpr": null
+        },
+        "https": {
+          "kind": "timing_and_size",
+          "interval_cv_max": 0.35,
+          "request_size_cv_max": 0.01,
+          "min_events": 6,
+          "consecutive_prefixes": 1,
+          "selection_status": "selected",
+          "development": {
+            "tp": 12,
+            "fn": 0,
+            "fp": 6,
+            "tn": 12,
+            "tpr": 1.0,
+            "fpr": 0.3333333333333333,
+            "coverage": 1.0,
+            "fpr_ci95": [
+              0.1627877475083369,
+              0.5625053270405489
+            ]
+          },
+          "max_development_fpr": null
+        }
+      }
+    },
+    "persistent_calibrated": {
+      "kind": "by_transport",
+      "transport_rules": {
+        "http": {
+          "kind": "timing_and_size",
+          "interval_cv_max": 0.35,
+          "request_size_cv_max": 0.06,
+          "min_events": 10,
+          "consecutive_prefixes": 3,
+          "selection_status": "selected",
+          "development": {
+            "tp": 12,
+            "fn": 0,
+            "fp": 6,
+            "tn": 12,
+            "tpr": 1.0,
+            "fpr": 0.3333333333333333,
+            "coverage": 1.0,
+            "fpr_ci95": [
+              0.1627877475083369,
+              0.5625053270405489
+            ]
+          },
+          "max_development_fpr": null
+        },
+        "https": {
+          "kind": "timing_and_size",
+          "interval_cv_max": 0.35,
+          "request_size_cv_max": 0.01,
+          "min_events": 10,
+          "consecutive_prefixes": 3,
+          "selection_status": "selected",
+          "development": {
+            "tp": 12,
+            "fn": 0,
+            "fp": 6,
+            "tn": 12,
+            "tpr": 1.0,
+            "fpr": 0.3333333333333333,
+            "coverage": 1.0,
+            "fpr_ci95": [
+              0.1627877475083369,
+              0.5625053270405489
+            ]
+          },
+          "max_development_fpr": null
+        }
+      }
+    },
+    "budgeted_persistent": {
+      "kind": "by_transport",
+      "transport_rules": {
+        "http": {
+          "kind": "timing_and_size",
+          "interval_cv_max": -1.0,
+          "request_size_cv_max": -1.0,
+          "min_events": 10,
+          "consecutive_prefixes": 3,
+          "selection_status": "no_useful_development_rule",
+          "development": {
+            "tp": 0,
+            "fn": 12,
+            "fp": 0,
+            "tn": 18,
+            "tpr": 0.0,
+            "fpr": 0.0,
+            "coverage": 1.0,
+            "fpr_ci95": [
+              0.0,
+              0.17587922364665765
+            ]
+          },
+          "max_development_fpr": 0.1
+        },
+        "https": {
+          "kind": "timing_and_size",
+          "interval_cv_max": -1.0,
+          "request_size_cv_max": -1.0,
+          "min_events": 10,
+          "consecutive_prefixes": 3,
+          "selection_status": "no_useful_development_rule",
+          "development": {
+            "tp": 0,
+            "fn": 12,
+            "fp": 0,
+            "tn": 18,
+            "tpr": 0.0,
+            "fpr": 0.0,
+            "coverage": 1.0,
+            "fpr_ci95": [
+              0.0,
+              0.17587922364665765
+            ]
+          },
+          "max_development_fpr": 0.1
+        }
+      }
+    }
+  },
+  "refinement": {
+    "min_events": 10,
+    "consecutive_prefixes": 3,
+    "max_development_fpr": 0.1,
+    "primary_comparison": "timing_and_size versus persistent_calibrated on the same held-out runs",
+    "budget_interpretation": "Empirical development cap, not a guaranteed held-out or operational FPR",
+    "feature_scope": "Same two CV features; transport selects thresholds; no profile/label/seed at prediction",
+    "ablation": "transport_calibrated isolates transport-specific fitting; persistent_calibrated also changes the event gate"
+  },
+  "frozen_utc": "2026-11-10T05:45:13.962517+00:00"
+}

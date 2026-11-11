@@ -1,0 +1,25 @@
+name: Bug report
+description: Report a reproducible issue in the lab or its reports.
+title: "[Bug] "
+body:
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Python version, and BeaconLab version or commit.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Exact command and configuration, including the seed when relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+      description: Include the relevant error or synthetic lab result.
+    validations:
+      required: true
