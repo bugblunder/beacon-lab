@@ -1,4 +1,4 @@
-# Verification — v0.2.1
+# Verification — v2.2
 
 This release prepares the repository for GitHub. It does not change detector
 logic or recollect the v0.2 study. Results and interpretation are in

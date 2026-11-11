@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2
+
+- Re-version the published package and release tag as `2.2` / `v2.2`.
+- Keep the v0.2.0 study provenance and all historical collection records unchanged.
+- Remove Docker packaging references; the supported workflow is direct Python installation and execution.
+
+
 ## 0.2.1
 
 - Shorten the README and put synthetic scope, headline result and caveat first.

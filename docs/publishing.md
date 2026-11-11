@@ -2,7 +2,7 @@
 
 Use `README.md` as the landing page and `VERIFICATION.md` for what was actually
 checked. Detailed setup, method and history live under `docs/`. The package is
-v0.2.1; the included headline study was collected with v0.2.0.
+v2.2; the included headline study was collected with v0.2.0.
 
 ## Before a commit
 
@@ -31,7 +31,7 @@ HTTPS clone URL. Run `git init -b main` only if Git is not already initialized.
 ```sh
 git init -b main
 git add .
-git commit -m "Prepare BeaconLab v0.2.1 for GitHub"
+git commit -m "Prepare BeaconLab v2.2 for GitHub"
 git remote add origin YOUR_REPOSITORY_URL
 git push -u origin main
 ```
